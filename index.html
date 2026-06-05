@@ -273,7 +273,7 @@
     </div>
 
     <!-- मुख्य फॉर्म बॉडी -->
-    <form class="form-body" id="kashiForm" autocomplete="off">
+    <form class="form-body" id="kashiForm" autocomplete="off" action="https://script.google.com/macros/s/AKfycbzRvFAZv_zs9dVDl1GiN8PcLi5bhCWSI-njcUNho6c7mUYVB4TGXiUe_mRGc2ZxoQrw/exec" method="POST">
         
         <input type="hidden" name="form_type" id="formTypeInput" value="New">
 
@@ -293,7 +293,7 @@
             </div>
             <div class="form-group">
                 <label>Write Your Problem / अपनी समस्या लिखें *</label>
-                <textarea id="complaintMessageField" placeholder="Describe your issue here..."></textarea>
+                <textarea id="complaintMessageField" name="complaint_message" placeholder="Describe your issue here..."></textarea>
             </div>
             <!-- 🚀 शिकायत के लिए पूरी तरह अलग बटन (बिना किसी फॉर्म वैलिडेशन क्लैश के) -->
             <button type="button" class="submit-btn" onclick="submitComplaintDirectly()" id="complaintSubmitBtn">Submit My Complaint</button>
@@ -375,8 +375,8 @@
 </div>
 
 <script>
-    // 🔗 Updated Google Script URL
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbylr7oeNzYlyK80UlC3UWJfGuaRhG2rQFZQlkyyT4IA_pUOYtUZVpJ4_K-Hq8YDze_s/exec";
+    // 🔗 Updated Google Script URL (Deployed on Jun 6, 2026)
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzRvFAZv_zs9dVDl1GiN8PcLi5bhCWSI-njcUNho6c7mUYVB4TGXiUe_mRGc2ZxoQrw/exec";
     let allBookings = []; 
     let allComplaints = []; 
 
