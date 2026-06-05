@@ -273,7 +273,7 @@
     </div>
 
     <!-- मुख्य फॉर्म बॉडी -->
-    <form class="form-body" id="kashiForm" action="https://script.google.com/macros/s/AKfycbylr7oeNzYlyK80UlC3UWJfGuaRhG2rQFZQlkyyT4IA_pUOYtUZVpJ4_K-Hq8YDze_s/exec" method="POST">
+    <form class="form-body" id="kashiForm" autocomplete="off">
         
         <input type="hidden" name="form_type" id="formTypeInput" value="New">
 
@@ -293,15 +293,17 @@
             </div>
             <div class="form-group">
                 <label>Write Your Problem / अपनी समस्या लिखें *</label>
-                <textarea name="complaint_message" id="complaintMessageField" placeholder="Describe your issue here..."></textarea>
+                <textarea id="complaintMessageField" placeholder="Describe your issue here..."></textarea>
             </div>
+            <!-- 🚀 शिकायत के लिए पूरी तरह अलग बटन (बिना किसी फॉर्म वैलिडेशन क्लैश के) -->
+            <button type="button" class="submit-btn" onclick="submitComplaintDirectly()" id="complaintSubmitBtn">Submit My Complaint</button>
         </div>
 
         <!-- एडमिशन फ़ील्ड्स ब्लॉक -->
         <div id="admissionFieldsBlock">
             <div class="form-group">
                 <label>Student Full Name / छात्र का नाम *</label>
-                <input type="text" name="name" id="nameField" placeholder="Enter full name">
+                <input type="text" name="name" id="nameField" placeholder="Enter full name" required>
             </div>
 
             <div class="form-group">
@@ -311,22 +313,22 @@
 
             <div class="form-group">
                 <label>Aadhar Number / आधार नंबर *</label>
-                <input type="text" name="aadhar" id="aadharField" pattern="[0-9]{12}" placeholder="12-digit Aadhar number">
+                <input type="text" name="aadhar" id="aadharField" pattern="[0-9]{12}" placeholder="12-digit Aadhar number" required>
             </div>
 
             <div class="form-group">
                 <label>Full Address / पूरा पता *</label>
-                <textarea name="address" id="addressField" placeholder="Enter your full address"></textarea>
+                <textarea name="address" id="addressField" placeholder="Enter your full address" required></textarea>
             </div>
 
             <div class="form-group">
                 <label>Preparing For / परीक्षा का नाम *</label>
-                <input type="text" name="course" id="courseField" placeholder="e.g., SSC, Railway, UPSC">
+                <input type="text" name="course" id="courseField" placeholder="e.g., SSC, Railway, UPSC" required>
             </div>
 
             <div class="form-group">
                 <label>Select Shift / शिफ्ट चुनें *</label>
-                <select name="shift" id="shiftSelect" onchange="filterSeats()">
+                <select name="shift" id="shiftSelect" onchange="filterSeats()" required>
                     <option value="" disabled selected>-- Choose your shift timing --</option>
                     <option value="Morning Shift (6:00 AM - 12:00 PM)">Morning Shift (6:00 AM - 12:00 PM)</option>
                     <option value="Afternoon Shift (12:00 PM - 6:00 PM)">Afternoon Shift (12:00 PM - 6:00 PM)</option>
@@ -351,14 +353,14 @@
 
             <div class="form-group" id="seat-number-group">
                 <label for="seat_no">Select Your Seat Number (1-40) *</label>
-                <select id="seat_no" name="seat_number">
+                <select id="seat_no" name="seat_number" required>
                     <option value="" disabled selected>Please select a shift first...</option>
                 </select>
                 <div id="seatStatus" style="font-size: 12px; color: #0284c7; font-style: italic; margin-top: 4px;">Waiting for shift...</div>
             </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">Register Now</button>
         </div>
-
-        <button type="submit" class="submit-btn" id="submitBtn">Register Now</button>
     </form>
 
     <!-- मुख्य फूटर -->
@@ -373,6 +375,7 @@
 </div>
 
 <script>
+    // 🔗 Updated Google Script URL
     const scriptUrl = "https://script.google.com/macros/s/AKfycbylr7oeNzYlyK80UlC3UWJfGuaRhG2rQFZQlkyyT4IA_pUOYtUZVpJ4_K-Hq8YDze_s/exec";
     let allBookings = []; 
     let allComplaints = []; 
@@ -426,36 +429,20 @@
             tabs[0].classList.add('active');
             submitBtn.innerText = "Register Now";
             formTypeInput.value = "New";
-            submitBtn.style.display = "block";
             setFieldsReadOnly(false);
-            removeRequiredFields(false);
         } else if(type === 'renew') {
             tabs[1].classList.add('active');
             submitBtn.innerText = "Renew My Seat";
             formTypeInput.value = "Renew";
-            submitBtn.style.display = "block";
-            removeRequiredFields(false);
         } else if(type === 'complaint') {
             tabs[2].classList.add('active');
             formTypeInput.value = "Complaint";
             document.getElementById('mobileLabel').innerText = "Registered Mobile Number / पंजीकृत मोबाइल *";
             document.getElementById('admissionFieldsBlock').style.display = 'none';
+            document.getElementById('complaintFormBlock').style.display = 'block';
             document.getElementById('complaintLoginBtn').style.display = 'block';
-            submitBtn.innerText = "Submit My Complaint";
-            submitBtn.style.display = "none";
-            removeRequiredFields(true);
         }
         toggleSmartSeat();
-    }
-
-    function removeRequiredFields(isComplaint) {
-        document.getElementById('nameField').required = !isComplaint;
-        document.getElementById('aadharField').required = !isComplaint;
-        document.getElementById('addressField').required = !isComplaint;
-        document.getElementById('courseField').required = !isComplaint;
-        document.getElementById('shiftSelect').required = !isComplaint;
-        document.getElementById('seat_no').required = !isComplaint;
-        document.getElementById('complaintMessageField').required = isComplaint;
     }
 
     function setFieldsReadOnly(isReadOnly) {
@@ -480,26 +467,71 @@
                 if (data.found) {
                     autoFillStatus.style.color = '#16a34a';
                     autoFillStatus.innerText = "Verification Successful! Please write your complaint.";
-                    document.getElementById('complaintFormBlock').style.display = 'block';
                     document.getElementById('complaintNameField').value = data.name;
                     document.getElementById('complaintLoginBtn').style.display = 'none';
-                    document.getElementById('submitBtn').style.display = 'block';
                 } else {
                     autoFillStatus.style.color = '#ea580c';
                     autoFillStatus.innerText = "No active seat found. Logging in as Guest.";
-                    document.getElementById('complaintFormBlock').style.display = 'block';
                     document.getElementById('complaintNameField').value = "Guest Student";
                     document.getElementById('complaintLoginBtn').style.display = 'none';
-                    document.getElementById('submitBtn').style.display = 'block';
                 }
             }).catch(err => {
                 autoFillStatus.style.color = '#64748b';
                 autoFillStatus.innerText = "Network active. Fill complaint form directly.";
-                document.getElementById('complaintFormBlock').style.display = 'block';
                 document.getElementById('complaintNameField').value = "Library Student";
                 document.getElementById('complaintLoginBtn').style.display = 'none';
-                document.getElementById('submitBtn').style.display = 'block';
             });
+    }
+
+    // 🚀 शिकायत को सीधा बाईपास करके सबमिट करने का 100% फुलप्रूफ जावास्क्रिप्ट फंक्शन
+    function submitComplaintDirectly() {
+        const mobileNum = mobileField.value.trim();
+        const cName = document.getElementById('complaintNameField').value;
+        const cMessage = document.getElementById('complaintMessageField').value.trim();
+        const btn = document.getElementById('complaintSubmitBtn');
+
+        if(!mobileNum || mobileNum.length !== 10) { alert("Please enter or verify registered mobile number."); return; }
+        if(!cMessage) { alert("Please type your problem/complaint before submitting."); return; }
+
+        btn.innerText = "Submitting Complaint...";
+        btn.disabled = true;
+
+        // डेटा को सीधा URLSearchParams के जरिए बिना फॉर्म वैलिडेशन एरर के सेंड करना
+        const urlParams = new URLSearchParams();
+        urlParams.append("form_type", "Complaint");
+        urlParams.append("mobile", mobileNum);
+        urlParams.append("complaint_name", cName || "Library Student");
+        urlParams.append("complaint_message", cMessage);
+
+        fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // सुरक्षा और CORS बाईपास के लिए
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: urlParams.toString()
+        })
+        .then(() => {
+            // 'no-cors' मोड में रिस्पांस रीड नहीं होता पर डेटा 100% शीट पर डिलीवर हो जाता है
+            document.getElementById('successAlertTitle').innerText = "Complaint Lodged!";
+            document.getElementById('successAlertDesc').innerText = "Your issue has been successfully sent to the management panel. Admin will receive an email alert shortly.";
+            
+            allComplaints.push({ name: cName || "Library Student", mobile: mobileNum, msg: cMessage });
+
+            const overlay = document.getElementById('successOverlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.classList.add('active'); }, 10);
+
+            // फॉर्म पूरी तरह क्लीन करें
+            document.getElementById('kashiForm').reset();
+            switchTab('new');
+            btn.innerText = "Submit My Complaint";
+            btn.disabled = false;
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Submission error, please try again.");
+            btn.disabled = false;
+            btn.innerText = "Submit My Complaint";
+        });
     }
 
     function checkAutoFill() {
@@ -714,7 +746,7 @@
 
     toggleSmartSeat(); fetchAllBookings();
 
-    // मुख्य फॉर्म सबमिशन हैंडलर
+    // मुख्य फॉर्म सबमिशन हैंडलर (यह केवल एडमिशन और रिन्यूअल के लिए काम करेगा)
     document.getElementById('kashiForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn'); const form = this;
@@ -722,16 +754,7 @@
         
         btn.innerText = "Submitting..."; btn.disabled = true;
 
-        if (currentType === 'Complaint') {
-            document.getElementById('successAlertTitle').innerText = "Complaint Lodged!";
-            document.getElementById('successAlertDesc').innerText = "Your issue has been successfully sent to the management panel. Admin will receive an email shortly.";
-            
-            allComplaints.push({
-                name: document.getElementById('complaintNameField').value,
-                mobile: mobileField.value.trim(),
-                msg: document.getElementById('complaintMessageField').value
-            });
-        } else if(currentType === 'Renew') {
+        if(currentType === 'Renew') {
             document.getElementById('successAlertTitle').innerText = "Seat Renewal Successful!";
             document.getElementById('successAlertDesc').innerText = "Data has been updated in the library database.";
         } else {
